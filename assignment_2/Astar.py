@@ -1,85 +1,107 @@
-import queue
-from typing import Optional, Protocol, TypeVar
-from Map import Map_Obj 
-import heapq
+from Map import Map_Obj
 
 
-#Code is gotten from redblobgames.com
+class Node():
+    def __init__(self, parent, pos: list[int, int], g: int, h: int):
+        self.pos = pos
+        self.parent = parent
+        self.g = g #actual cost path from start node to current node
+        self.h = h #the actual cost path from the current node to the gole node
 
-Location = TypeVar('Location')
+    def get_pos(self):
+        return self.pos
 
-def man_dis(a: list, b: list) -> float: #FOR THE FIRST PART, should be simple
-        #manhatten distance
-        x1, y1 = a[0], a[1]
-        x2, y2 = b[0], b[1]
-        return abs(x1 - x2) + abs(y1-y2)
+    #actual cost path from start node to the goal node
+    def get_f(self): 
+        return self.g + self.h
 
 
 def a_star_search(map: Map_Obj):
-    # start_pos har to koordinater
     start = map.get_start_pos()
-    goal = map.get_end_goal_pos()
+    goal = map.get_goal_pos()
 
-    frontier = queue.PriorityQueue() #open list
-    frontier.put((0, start))
+    open = [] #nodes that have not yet been explored
+    closed = [] ##nodes that have been exlpored
 
-    came_from: dict[Location, Optional[Location]] = {}  
-    cost_so_far: dict[Location, float] = {}
-    visited = []
-    
-    # came_from[start[0], start[1]] = None 
-    # cost_so_far[start[0], start[1]] = 0
+    open.append(Node(None, start, 0, man_dis(start, goal)))
 
-    came_from[tuple(start)] = None 
-    cost_so_far[tuple(start)] = 0
-    
-    while not frontier.empty():
-        current = frontier.get()[1]
+    while open:
 
-        neighbour_pos = [
-            (current[0], current[1] - 1),
-            (current[0], current[1] + 1),
-            (current[0] - 1, current[1]),
-            (current[0] + 1, current[1])
-        ]
-        
-        if current == goal: #early exit
+        # Task 5 moving goal ticker
+        if map.get_goal_pos != map.get_end_goal_pos:
+            goal = map.tick()
+
+        # Using priority queue did not work, must sort queue manually
+        open.sort(key=lambda x: x.get_f())
+
+        # Getting the node with the lowest f
+        current = open.pop(0)
+
+        current_pos = current.get_pos()
+
+        # Early exit, check if goal is reached
+        if current_pos == goal:
             break
 
-        for next in neighbour_pos: #må endres, legge til i map?
-            if map.get_cell_value(next) < 0:
-                 break
-            #må sjekke om man har vært et sted
-            
-            new_cost = cost_so_far[tuple(current)] + map.get_cell_value(next) #map.cost(current, next) = map.get_cell_value #muffens
+        # Find neighbours
+        neighbour_nodes = [
+            [current_pos[0], current_pos[1] - 1],
+            [current_pos[0], current_pos[1] + 1],
+            [current_pos[0] - 1, current_pos[1]],
+            [current_pos[0] + 1, current_pos[1]]
+        ]
 
-            print(cost_so_far)
+        for next in neighbour_nodes:
+            # Check if neighbour can be traversed
+            if map.get_cell_value(next) > 0:
 
-            priority = new_cost + man_dis(next, goal)
-            if next not in cost_so_far or priority < cost_so_far[next] or next not in visited: #cost_so_far[next]
-                cost_so_far[next] = new_cost
-                frontier.put((priority,next))
-                came_from[next] = current
-                
-        visited.append(current)
-        map.set_cell_value(current, 5)
-         
-    map.show_map()
-    return came_from, cost_so_far
+                # Calculate the cost from the start to this position
+                g = current.g + map.get_cell_value(next)
+                #Create neighbour node based on new current g 
+                child = Node(current, next, g, man_dis(next, goal))
+
+                # Check if the possible child node is already in open or closed 
+                if next not in [item.get_pos() for item in open] and next not in [item.get_pos() for item in closed]:
+                    open.append(child)
+
+        closed.append(current)
+
+    #If this prints, too bad :(
+    if current_pos != goal:
+        print("No path to the goal!")
+    else:
+        # Trace back the path to find the fastest route
+        path = []
+        while current:
+            path.insert(0, current.get_pos())
+            current = current.parent
+        for next in path:
+            if next not in [start, goal]:
+                map.set_cell_value(next, 10)
+        map.show_map()
 
 
+
+def man_dis(a: list, b: list) -> float: #FOR THE FIRST PART, should be simple
+    #manhatten distance
+    x1, y1 = a[0], a[1]
+    x2, y2 = b[0], b[1]
+    return abs(x1 - x2) + abs(y1-y2)
+
+
+#To run the program
 if __name__ == "__main__":
-    task_1 = Map_Obj(task=1)
+    task_1 = Map_Obj(1)
     a_star_search(task_1)
-   
-    task_2 = Map_Obj(task=2)
+
+    task_2 = Map_Obj(2)
     a_star_search(task_2)
 
-    task_3 = Map_Obj(task=3)
+    task_3 = Map_Obj(3)
     a_star_search(task_3)
 
-    task_4 = Map_Obj(task=4)
+    task_4 = Map_Obj(4)
     a_star_search(task_4)
 
-    task_5 = Map_Obj(task=5)
+    task_5 = Map_Obj(5)
     a_star_search(task_5)
