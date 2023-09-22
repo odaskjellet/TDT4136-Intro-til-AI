@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from PIL import Image
-from typing import Union
+from typing import TypeVar, Union
 
 np.set_printoptions(threshold=np.inf, linewidth=300)
 
@@ -47,6 +47,8 @@ class Map_Obj():
         self.set_cell_value(self.start_pos, ' S ')
         self.set_cell_value(self.goal_pos, ' G ')
         self.tick_counter = 0
+        #For saving image
+        self.task = task
 
     def read_map(self, path: str) -> tuple[np.ndarray, str]: #read_map expects a path whoch is a string, return a tuple
         """

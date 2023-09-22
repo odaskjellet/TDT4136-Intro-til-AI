@@ -4,98 +4,82 @@ from Map import Map_Obj
 import heapq
 
 
+#Code is gotten from redblobgames.com
+
 Location = TypeVar('Location')
-class Graph(Protocol):
-    def neighbors(self, id: Location) -> list[Location]: pass
-
-# class PriorityQueue:
-#     def __init__(self):
-#         self.elements: list[tuple[float, T]] = []
-    
-#     def empty(self) -> bool:
-#         return not self.elements
-    
-#     def put(self, item: T, priority: float):
-#         heapq.heappush(self.elements, (priority, item))
-    
-#     def get(self) -> T:
-#         return heapq.heappop(self.elements)[1]
-
-
-class WeightedGraph(Graph):
-    def cost(self, from_id: Location, to_id: Location) -> float: pass
-
-
 
 def man_dis(a: list, b: list) -> float: #FOR THE FIRST PART, should be simple
         #manhatten distance
         x1, y1 = a[0], a[1]
         x2, y2 = b[0], b[1]
-        return abs(x1 - x2) - abs(y1-y2)
+        return abs(x1 - x2) + abs(y1-y2)
 
 
+def a_star_search(map: Map_Obj):
+    # start_pos har to koordinater
+    start = map.get_start_pos()
+    goal = map.get_end_goal_pos()
 
-def a_star_search(graph: WeightedGraph, start: Location, goal: Location):
-    frontier = queue.PriorityQueue()
-    frontier.put(start, 0)
-    came_from: dict[Location, Optional[Location]] = {}
+    frontier = queue.PriorityQueue() #open list
+    frontier.put((0, start))
+
+    came_from: dict[Location, Optional[Location]] = {}  
     cost_so_far: dict[Location, float] = {}
-    came_from[start] = None
-    cost_so_far[start] = 0
+    visited = []
+    
+    # came_from[start[0], start[1]] = None 
+    # cost_so_far[start[0], start[1]] = 0
+
+    came_from[tuple(start)] = None 
+    cost_so_far[tuple(start)] = 0
     
     while not frontier.empty():
-        current: Location = frontier.get()
+        current = frontier.get()[1]
+
+        neighbour_pos = [
+            (current[0], current[1] - 1),
+            (current[0], current[1] + 1),
+            (current[0] - 1, current[1]),
+            (current[0] + 1, current[1])
+        ]
         
         if current == goal: #early exit
             break
-        
-        for next in graph.neighbors(current):
-            new_cost = cost_so_far[current] + graph.cost(current, next)
-            if next not in cost_so_far or new_cost < cost_so_far[next]:
-                cost_so_far[next] = new_cost
-                priority = new_cost + man_dis(next, goal)
-                frontier.put(next, priority)
-                came_from[next] = current
-    
-    return came_from, cost_so_far
 
-# def a_star_search(graph: WeightedGraph, start: Location, goal: Location):
-#     frontier = PriorityQueue()
-#     frontier.put(start, 0)
-#     came_from: dict[Location, Optional[Location]] = {}
-#     cost_so_far: dict[Location, float] = {}
-#     came_from[start] = None
-#     cost_so_far[start] = 0
-    
-#     while not frontier.empty():
-#         current: Location = frontier.get()
-        
-#         if current == goal: #early exit
-#             break
-        
-#         for next in graph.neighbors(current):
-#             new_cost = cost_so_far[current] + graph.cost(current, next)
-#             if next not in cost_so_far or new_cost < cost_so_far[next]:
-#                 cost_so_far[next] = new_cost
-#                 priority = new_cost + man_dis(next, goal)
-#                 frontier.put(next, priority)
-#                 came_from[next] = current
-    
-#     return came_from, cost_so_far
+        for next in neighbour_pos: #må endres, legge til i map?
+            if map.get_cell_value(next) < 0:
+                 break
+            #må sjekke om man har vært et sted
+            
+            new_cost = cost_so_far[tuple(current)] + map.get_cell_value(next) #map.cost(current, next) = map.get_cell_value #muffens
+
+            print(cost_so_far)
+
+            priority = new_cost + man_dis(next, goal)
+            if next not in cost_so_far or priority < cost_so_far[next] or next not in visited: #cost_so_far[next]
+                cost_so_far[next] = new_cost
+                frontier.put((priority,next))
+                came_from[next] = current
+                
+        visited.append(current)
+        map.set_cell_value(current, 5)
+         
+    map.show_map()
+    return came_from, cost_so_far
 
 
 if __name__ == "__main__":
-    task_1 = Map_Obj(1)
+    task_1 = Map_Obj(task=1)
     a_star_search(task_1)
-
-    task_2 = Map_Obj(2)
+   
+    task_2 = Map_Obj(task=2)
     a_star_search(task_2)
 
-    task_3 = Map_Obj(3)
+    task_3 = Map_Obj(task=3)
     a_star_search(task_3)
 
-    task_4 = Map_Obj(4)
+    task_4 = Map_Obj(task=4)
     a_star_search(task_4)
 
-    task_5 = Map_Obj(5)
+    task_5 = Map_Obj(task=5)
     a_star_search(task_5)
