@@ -31,7 +31,7 @@ class Map_Obj():
     get_maps()
         Get integer and string maps
     """
-    
+
     def __init__(self, task: int = 1) -> None: #Task expects an integer number = 1
         """Instantiate a map object for task number `task`.
 
@@ -104,27 +104,27 @@ class Map_Obj():
             start_pos = [27, 18]
             goal_pos = [40, 32]
             end_goal_pos = goal_pos
-            path_to_map = 'assignment_2\Samfundet_map_1.csv'
+            path_to_map = 'assignment_2/Samfundet_map_1.csv'
         elif task == 2:
             start_pos = [40, 32]
             goal_pos = [8, 5]
             end_goal_pos = goal_pos
-            path_to_map = 'assignment_2\Samfundet_map_1.csv'
+            path_to_map = 'assignment_2/Samfundet_map_1.csv'
         elif task == 3:
             start_pos = [28, 32]
             goal_pos = [6, 32]
             end_goal_pos = goal_pos
-            path_to_map = 'assignment_2\Samfundet_map_2.csv'
+            path_to_map = 'assignment_2/Samfundet_map_2.csv'
         elif task == 4:
             start_pos = [28, 32]
             goal_pos = [6, 32]
             end_goal_pos = goal_pos
-            path_to_map = 'assignment_2\Samfundet_map_Edgar_full.csv'
+            path_to_map = 'assignment_2/Samfundet_map_Edgar_full.csv'
         elif task == 5:
             start_pos = [14, 18]
             goal_pos = [6, 36]
             end_goal_pos = [6, 7]
-            path_to_map = 'assignment_2\Samfundet_map_2.csv'
+            path_to_map = 'assignment_2/Samfundet_map_2.csv'
 
         return start_pos, goal_pos, end_goal_pos, path_to_map
 
@@ -351,5 +351,8 @@ class Map_Obj():
                     for j in range(scale):
                         pixels[x * scale + i,
                                y * scale + j] = colors[themap[y][x]]
+                        
+        #Save Image
+        image.save(f"./assignment_2/report/images/task_{self.task}.png")
         # Show image
         image.show()
