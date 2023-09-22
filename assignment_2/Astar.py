@@ -1,5 +1,11 @@
 from Map import Map_Obj
 
+def man_dis(a: list, b: list) -> float: #FOR THE FIRST PART, should be simple
+    #manhatten distance
+    x1, y1 = a[0], a[1]
+    x2, y2 = b[0], b[1]
+    return abs(x1 - x2) + abs(y1-y2)
+
 
 class Node():
     def __init__(self, parent, pos: list[int, int], g: int, h: int):
@@ -79,14 +85,6 @@ def a_star_search(map: Map_Obj):
             if next not in [start, goal]:
                 map.set_cell_value(next, 10)
         map.show_map()
-
-
-
-def man_dis(a: list, b: list) -> float: #FOR THE FIRST PART, should be simple
-    #manhatten distance
-    x1, y1 = a[0], a[1]
-    x2, y2 = b[0], b[1]
-    return abs(x1 - x2) + abs(y1-y2)
 
 
 #To run the program
