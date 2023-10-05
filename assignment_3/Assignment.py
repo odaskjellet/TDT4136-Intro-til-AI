@@ -169,6 +169,19 @@ class CSP:
         iterations of the loop.
         """
         # TODO: YOUR CODE HERE
+
+        #Ikke sånn den skal funke men en start
+        for i in assignment:
+            if len(1) != 1:
+                return assignment
+        
+        #Først sjekke om variablene har lengde 1, hvis sant, returner assignment
+        #SÅ kall på interefernce koden
+
+        for value in assignment:
+            #TODO: greier
+            pass
+            
         pass
 
     def select_unassigned_variable(self, assignment):
@@ -177,7 +190,28 @@ class CSP:
         in 'assignment' that have not yet been decided, i.e. whose list
         of legal values has a length greater than one.
         """
-        # TODO: YOUR CODE HERE
+        #MVR: choose the variable fewest "legal" values -> most constrained variable
+        #degree heuristic: select the variable that is involved in the largest number of constraints on other unassigned variables
+
+        mrv = []
+
+        #Minimum Remainin Values: choose the variable with the smallest domain first
+        for var in assignment:
+            
+            #Find the variables that have not yet been decided
+            if len(assignment[var]) > 1:
+                mrv.append([var, len[assignment[var]]])
+
+        #Sort the unassigned variables by ascending order (least to most)
+        mrv.sort(key=lambda x: x[1])
+
+        #Return variable if there is any in mrv
+        if mrv:
+            return mrv[0][0]
+        return None
+
+        #after selecting a variable, we must decide the order to examine its values
+        #least-constraining-value 
         pass
 
     def inference(self, assignment, queue):
@@ -187,6 +221,10 @@ class CSP:
         is the initial queue of arcs that should be visited.
         """
         # TODO: YOUR CODE HERE
+
+
+
+
         pass
 
     def revise(self, assignment, i, j):
