@@ -2,6 +2,7 @@
 # Original code by Håkon Måløy
 # Updated by Xavier Sánchez Díaz
 
+import sys
 import copy
 from itertools import product as prod
 
@@ -17,6 +18,10 @@ class CSP:
         # self.constraints[i][j] is a list of legal value pairs for
         # the variable pair (i, j)
         self.constraints = {}
+
+        #Trackers for number of times the backtracking search has run and no of times it has failed
+        self.runs = 0
+        self.fails = 0
 
     def add_variable(self, name: str, domain: list):
         """Add a new variable to the CSP.
@@ -168,21 +173,44 @@ class CSP:
         assignments and inferences that took place in previous
         iterations of the loop.
         """
-        # TODO: YOUR CODE HERE
+        # Based on the pseudocode from the book
+
+
+        #No. of runs
+        self.runs += 1
 
         #Ikke sånn den skal funke men en start
-        for i in assignment:
-            if len(1) != 1:
+        #Check if all varables have been assigned, if true, return
+        for var in assignment:
+            if len(assignment[var]) != 1: 
+                break
+            else:
                 return assignment
-        
-        #Først sjekke om variablene har lengde 1, hvis sant, returner assignment
-        #SÅ kall på interefernce koden
 
-        for value in assignment:
-            #TODO: greier
-            pass
-            
-        pass
+        var = self.select_unassigned_variable(assignment)
+
+
+        for value in assignment[var]:
+
+            #deepcopy 
+            deepcopy = copy.deepcopy(assignment)
+
+            deepcopy[var] = [value]
+
+            #AC-3 algorithm
+            queue = self.get_all_arcs()
+            inferences = self.inference(deepcopy, queue)
+
+            if inferences:
+                #recursive call
+                result = self.backtrack(deepcopy)
+
+                if result:
+                    return result
+
+        self.fails += 1
+        return False
+
 
     def select_unassigned_variable(self, assignment):
         """The function 'Select-Unassigned-Variable' from the pseudocode
@@ -190,29 +218,26 @@ class CSP:
         in 'assignment' that have not yet been decided, i.e. whose list
         of legal values has a length greater than one.
         """
-        #MVR: choose the variable fewest "legal" values -> most constrained variable
+        #MRV: choose the variable fewest "legal" values -> most constrained variable
         #degree heuristic: select the variable that is involved in the largest number of constraints on other unassigned variables
 
         mrv = []
 
         #Minimum Remainin Values: choose the variable with the smallest domain first
         for var in assignment:
-            
             #Find the variables that have not yet been decided
             if len(assignment[var]) > 1:
-                mrv.append([var, len[assignment[var]]])
+                mrv.append([var, len(assignment[var])])
 
         #Sort the unassigned variables by ascending order (least to most)
+        #Least-constrained variable
         mrv.sort(key=lambda x: x[1])
-
+        
         #Return variable if there is any in mrv
         if mrv:
             return mrv[0][0]
         return None
 
-        #after selecting a variable, we must decide the order to examine its values
-        #least-constraining-value 
-        pass
 
     def inference(self, assignment, queue):
         """The function 'AC-3' from the pseudocode in the textbook.
@@ -220,12 +245,22 @@ class CSP:
         the lists of legal values for each undecided variable. 'queue'
         is the initial queue of arcs that should be visited.
         """
-        # TODO: YOUR CODE HERE
+        #Forward checking - simple, but doesn't look far enough
+        #Maintaining Arc Consistency (MAC) - looks further
 
+        #Code based on the pseudocode from the book
+        while queue:
+            i, j = queue.pop()
+            if self.revise(assignment, i, j):
 
-
-
-        pass
+                D_i = assignment[i]
+                if len(D_i) == 0:
+                    return False
+                
+                for k in self.get_all_neighboring_arcs(i):
+                    if j not in k:
+                        queue.append(k)
+        return True
 
     def revise(self, assignment, i, j):
         """The function 'Revise' from the pseudocode in the textbook.
@@ -236,8 +271,33 @@ class CSP:
         between i and j, the value should be deleted from i's list of
         legal values in 'assignment'.
         """
-        # TODO: YOUR CODE HERE
-        pass
+        #Based on the pseudocode from the book
+
+        revised = False
+        D_i = assignment[i]
+        updated_domain = []
+
+        for x in D_i:
+            consistent = False
+            for y in assignment[j]:
+                if (x,y) in self.constraints[i][j]:
+                    #Add to domain
+                    #updated_domain.append(x)
+                    #break
+                    # ^ did not work
+                    consistent = True
+                    break
+
+            # Add assignment to domain if consistent
+            if consistent:
+                updated_domain.append(x)
+            else:
+                revised = True
+                
+        assignment[i] = updated_domain
+                
+        return revised
+
 
 
 def create_map_coloring_csp():
@@ -314,3 +374,40 @@ def print_sudoku_solution(solution):
         print("")
         if row == 2 or row == 5:
             print('------+-------+------')
+
+
+def main() -> int:
+    
+    easy = create_sudoku_csp("./assignment_3/easy.txt")
+    print("Sudoku Easy \n")
+    print(easy.backtracking_search())
+    print_sudoku_solution(easy.backtracking_search())
+    print()
+    print(f"Number of times run: {easy.runs}")
+    print(f"Number of times failed: {easy.fails}")
+
+    medium = create_sudoku_csp("./assignment_3/medium.txt")
+    print("Sudoku Medium \n")
+    print_sudoku_solution(medium.backtracking_search())
+    print()
+    print(f"Number of times run: {medium.runs}")
+    print(f"Number of times failed: {medium.fails}")
+
+    hard = create_sudoku_csp("./assignment_3/hard.txt")
+    print("Sudoku Hard \n")
+    print_sudoku_solution(hard.backtracking_search())
+    print()
+    print(f"Number of times run: {hard.runs}")
+    print(f"Number of times failed: {hard.fails}")
+
+    veryhard = create_sudoku_csp("./assignment_3/veryhard.txt")
+    print("Sudoku Very Hard \n")
+    print_sudoku_solution(veryhard.backtracking_search())
+    print()
+    print(f"Number of times run: {veryhard.runs}")
+    print(f"Number of times failed: {veryhard.fails}")
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main()) 
