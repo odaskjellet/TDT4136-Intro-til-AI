@@ -380,7 +380,6 @@ def main() -> int:
     
     easy = create_sudoku_csp("./assignment_3/easy.txt")
     print("Sudoku Easy \n")
-    print(easy.backtracking_search())
     print_sudoku_solution(easy.backtracking_search())
     print()
     print(f"Number of times run: {easy.runs}")
