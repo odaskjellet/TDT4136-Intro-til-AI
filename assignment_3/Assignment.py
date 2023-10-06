@@ -181,13 +181,17 @@ class CSP:
 
         #Ikke sånn den skal funke men en start
         #Check if all varables have been assigned, if true, return
-        for var in assignment:
-            if len(assignment[var]) != 1: 
-                break
-            else:
-                return assignment
+        # for var in assignment:
+        #     if len(assignment[var]) != 1: 
+        #         break
+        #     else:
+        #         return assignment
+        #^denne funka ikke
 
         var = self.select_unassigned_variable(assignment)
+
+        if var == None:
+            return assignment
 
 
         for value in assignment[var]:
